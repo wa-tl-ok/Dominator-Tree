@@ -22,28 +22,18 @@ using namespace std;
 
 void print(vector<int>& a) {
     for (auto q : a) {
-        cout << q + 1 << ' ';
+        cout << q << ' ';
     }
     cout << "\n";
 }
 
-struct Persistent_DSU {
-    struct rollback {
-        int x;
-        int y;
-        int rx;
-        int ry;
-        int mnx;
-        int mny;
-    };
-
+struct DSU {
     vector<int> head;
     vector<int> rang;
     vector<int> DSU_Sdom;
     vector<int> DSU_tin;
-    vector<rollback> condition;
 
-    Persistent_DSU(int n, vector<int> &Sdom, vector<int> &tin) {
+    DSU(int n, vector<int> &Sdom, vector<int> &tin) {
         head.resize(n);
         for (int i = 0; i < n; i++) {
             head[i] = i;
@@ -87,8 +77,6 @@ struct Persistent_DSU {
             if (DSU_tin[DSU_Sdom[y]] < DSU_tin[DSU_Sdom[x]]) {
                 DSU_Sdom[x] = DSU_Sdom[y];
             }
-
-            condition.push_back({ x, y, rang[x], rang[y], DSU_Sdom[x], DSU_Sdom[y] });
         }
         else {
             rang[x] += rang[y];
@@ -97,32 +85,9 @@ struct Persistent_DSU {
             if (DSU_tin[DSU_Sdom[y]] < DSU_tin[DSU_Sdom[x]]) {
                 DSU_Sdom[x] = DSU_Sdom[y];
             }
-
-            condition.push_back({ y, x, rang[y], rang[x], DSU_Sdom[x], DSU_Sdom[y] });
         }
 
         return true;
-    }
-
-    void Back(int k) {
-        for (int i = 0; i < k; i++) {
-            auto T = condition[condition.size() - 1];
-
-            int x = T.x;
-            int y = T.y;
-            int rx = T.rx;
-            int ry = T.ry;
-            int mnx = T.mnx;
-            int mny = T.mny;
-
-            head[x] = x;
-            rang[x] = rx;
-            rang[y] = ry;
-            DSU_Sdom[x] = mnx;
-            DSU_Sdom[y] = mny;
-
-            condition.pop_back();
-        }
     }
 
     int Get_Sdom(int x) {
@@ -168,7 +133,7 @@ void dfs_pred(int v, int p) {
 vector<int> Sdom;
 vector<vector<int>> R_G;
 
-void Build_Sdom(int n, int m, int s, Persistent_DSU & P_dsu) {
+void Build_Sdom(int n, int m, int s, DSU & dsu) {
     vector<pair<int, int>> reverse_dfs_path;
 
     int k = 0;
@@ -186,12 +151,12 @@ void Build_Sdom(int n, int m, int s, Persistent_DSU & P_dsu) {
         int v = reverse_dfs_path[i].second;
         int t = reverse_dfs_path[i].first;
 
-        P_dsu.Union(v, pred[v]);
+        dsu.Union(v, pred[v]);
 
         for (auto u : R_G[v]) {
             if (tin[u] > tin[v]) {
-                Sdom[v] = min(Sdom[v], P_dsu.Get_Sdom(u));
-                P_dsu.Union(v, u);
+                Sdom[v] = min(Sdom[v], dsu.Get_Sdom(u));
+                dsu.Union(v, u);
             }
         }
     }
@@ -281,8 +246,8 @@ int main() {
     }
 
     Sdom[s] = s;
-    Persistent_DSU P_dsu(n, Sdom, tin);
-    Build_Sdom(n, m, s, P_dsu);
+    DSU dsu(n, Sdom, tin);
+    Build_Sdom(n, m, s, dsu);
 
     DFS_tree.resize(n);
 
@@ -300,9 +265,7 @@ int main() {
     }
     Dom[s] = s;
 
-    
-
-    print(Dom);
+    print(Sdom);
 
     return 0;
 }
