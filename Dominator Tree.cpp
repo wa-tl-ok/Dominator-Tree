@@ -211,10 +211,6 @@ void Build_DFS_tree(int v) {
     }
 }
 
-int Get_min(int u, int v) {
-
-}
-
 int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(0);
@@ -304,34 +300,7 @@ int main() {
     }
     Dom[s] = s;
 
-    vector<pair<int, int>> reverse_dfs_path;
-
-    int k = 0;
-    for (int i = 0; i < n; i++) {
-        if (tin[i] != 0) {
-            reverse_dfs_path.push_back(make_pair(tin[i], i));
-            ++k;
-        }
-    }
-
-    sort(reverse_dfs_path.begin(), reverse_dfs_path.end());
-    reverse(reverse_dfs_path.begin(), reverse_dfs_path.end());
-
-    for (int i = 0; i < k - 1; i++) {
-        int v = reverse_dfs_path[i].second;
-
-        int v1 = v;
-        int v2 = Sdom[v];
-
-        int u = Get_min(v1, v2);
-
-        if (Sdom[u] >= Sdom[v]) {
-            Dom[v] = Sdom[u];
-        }
-        else {
-            Dom[v] = Dom[u];
-        }
-    }
+    
 
     print(Dom);
 
